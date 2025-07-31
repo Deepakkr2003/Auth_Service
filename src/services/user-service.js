@@ -5,6 +5,7 @@ const UserRepository = require('../repository/user-repository');
 const {JWT_KEY} = require('../config/serverConfig');
 
 
+
 class UserService {
     constructor() {
         this.userRepository = new UserRepository();
@@ -18,6 +19,25 @@ class UserService {
             throw error;
         }
     };
+
+    async signIn(email,plainPassword){
+        try {
+            // step 1 -> fetch the user using the email
+            const user = await this.userRepository.getByEmail(email);
+            // step2 -> compare incoming password with stored encrpted password
+            const passwordsMatch = this.checkPassword(plainPassword,user.password);
+            if(!passwordsMatch){
+                console.log("Password doesn't mathc");
+                throw {error: 'Incorrect password'};
+            }
+            // step3 -> if password match then create a token and send it to the user
+            const newJWT = this.createToken({email:user.email,id:user.id});
+            return newJWT;
+        } catch (error) {
+            console.log("Something went wrong on signin process");
+            throw error;
+        }
+    }
     
 
     createToken(user){
