@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 
 const UserRepository = require('../repository/user-repository');
 const {JWT_KEY} = require('../config/serverConfig');
+const AppErrors = require('../utils/error-handler');
 
 
 
@@ -15,8 +16,11 @@ class UserService {
             const user = await this.userRepository.create(data);
             return user;
         } catch (error) {
+            if(error.name=='SequelizeValidationError'){
+                throw error;
+            }
             console.log("Something went wrong on service layer");
-            throw error;
+            throw error
         }
     };
 
@@ -90,7 +94,8 @@ class UserService {
         try {
             return this.userRepository.isAdmin(userId); 
         } catch (error) {
-            
+            console.log("Something went wrong in service layer");
+            throw error;
         }
     }
 }
